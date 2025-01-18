@@ -23,11 +23,10 @@ public class Archivio {
         System.out.println("digita 2 per aggiungere un Rivista");
         System.out.println("digita 3 per ricercare una Pubblicazione ");
         System.out.println("digita 4 per eliminiare una pubblicazione");
-        System.out.println("digita 6 per ricercare  tramite anno di pubblicazione ");
-        System.out.println("digita 7 per ricercare un autore ");
-        System.out.println("digita 8 per modificare una pubblicazione ");
+        System.out.println("digita 5 per ricercare  tramite anno di pubblicazione ");
+        System.out.println("digita 6 per ricercare un autore ");
+        System.out.println("digita 7 per modificare una pubblicazione ");
         System.out.println("digita 0 terminare");
-
 
         int azioneScelta= sc.nextInt();
         sc.nextLine();
@@ -42,18 +41,44 @@ public class Archivio {
                 aggiungiRivista(22, "la stagione calcistica", 2);
                 break;
             case 3:
-                ricercaPub(2);
+                try {
+                    System.out.println("inserisci il codice ibsn della pubblicazione che desideri cercare");
+                    long num=sc.nextLong();
+                    sc.nextLine();
+                ricercaPub(num);}
+                catch (Exception e){
+                    System.out.println("Errore di inserimento" + e.getMessage());
+                }
                 break;
             case 4:
-                eliminaPub(21);
+                try {
+                    System.out.println("inserisci il codice ibsn della pubblicazione che vuoi eliminare");
+                    long num=sc.nextLong();
+                    sc.nextLine();
+                    eliminaPub(num);
+                }catch (NumberFormatException e){
+                    System.out.println("devi inserire un numero" + e.getMessage());
+                }
+                break;
             case 5:
-                ricercaAnnoPub(1950);
+                try {
+                    System.out.println("inserisci l'anno di pubblicazion");
+                    long anno=sc.nextLong();
+                    sc.nextLine();
+                ricercaAnnoPub(anno);}
+                catch (NumberFormatException e){
+                    System.out.println("non hai inserito un numero" + e.getMessage());
+                }
                 break;
             case 6:
-                ricercaAnnoPub(1950);
-                break;
-            case 7:
-                ricercaAutore("Quasimodo");
+                try {
+                    System.out.println("inserisci l'autore che vuoi ricercare");
+                    String autore=sc.nextLine();
+                ricercaAutore(autore);
+                }
+                catch (Exception e){
+                    System.out.println("errore di inserimento" + e.getMessage());
+                }
                 break;
             case 8:
                 System.out.println("Fornisci Ibsn della pubblicazione da modificare");
@@ -65,9 +90,7 @@ public class Archivio {
             default:
                 throw new Exception("selezione invalida");
 
-
         }
-
 
 
     }
@@ -160,7 +183,6 @@ public class Archivio {
         public static void eliminaPub(long i){
             System.out.println( "pubblicazione eliminata: " + listaPubblicazioni.get(i));
         listaPubblicazioni.remove(i);
-
         }
 
         public static List<Pubblicazioni> ricercaAnnoPub(long anno){
@@ -181,7 +203,6 @@ public class Archivio {
         return ricercaPerAnno;
 
     }
-
 
     public static void modifica(long ibsn) throws IsbnInesitente {
 
