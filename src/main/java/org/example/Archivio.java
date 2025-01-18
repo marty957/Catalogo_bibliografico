@@ -14,18 +14,59 @@ public class Archivio {
     private static Map<Long,Pubblicazioni> listaPubblicazioni = new HashMap<Long,Pubblicazioni>();
 
 
-    public static void main(String[] args) throws IsbnInesitente {
+    public static void main(String[] args) throws Exception {
 
-        creazioneArchivio().forEach(((i, pubblicazioni) ->
-                System.out.println(pubblicazioni.toString())));
+        creazioneArchivio();
 
-        aggiungiLibri(21);
-        aggiungiRivista(22,"la stagione calcistica",2);
-        ricercaPub(2);
-        eliminaPub(21);
-        ricercaAnnoPub(1950);
+        System.out.println("Cosa vuoi fare?");
+        System.out.println("digita 1 per aggiungere un libro");
+        System.out.println("digita 2 per aggiungere un Rivista");
+        System.out.println("digita 3 per ricercare una Pubblicazione ");
+        System.out.println("digita 4 per eliminiare una pubblicazione");
+        System.out.println("digita 6 per ricercare  tramite anno di pubblicazione ");
+        System.out.println("digita 7 per ricercare un autore ");
+        System.out.println("digita 8 per modificare una pubblicazione ");
+        System.out.println("digita 0 terminare");
 
 
+        int azioneScelta= sc.nextInt();
+        sc.nextLine();
+        switch (azioneScelta) {
+            case 0:
+                System.out.println("programma terminato");
+                break;
+            case 1:
+                aggiungiLibri(21);
+                break;
+            case 2:
+                aggiungiRivista(22, "la stagione calcistica", 2);
+                break;
+            case 3:
+                ricercaPub(2);
+                break;
+            case 4:
+                eliminaPub(21);
+            case 5:
+                ricercaAnnoPub(1950);
+                break;
+            case 6:
+                ricercaAnnoPub(1950);
+                break;
+            case 7:
+                ricercaAutore("Quasimodo");
+                break;
+            case 8:
+                System.out.println("Fornisci Ibsn della pubblicazione da modificare");
+                long ibsn=sc.nextLong();
+                sc.nextLine();
+                modifica(ibsn);
+                break;
+
+            default:
+                throw new Exception("selezione invalida");
+
+
+        }
 
 
 
@@ -131,17 +172,50 @@ public class Archivio {
         return ricercaPerAnno;
 
         };
-    public static List<Libri> ricercaAutore(String autore){
+    public static List<Pubblicazioni> ricercaAutore(String autore){
 
-        List<Libri> ricercaPerAnno=new ArrayList<Libri>(listaPubblicazioni.values(<Libri>));
-        ricercaPerAnno.stream().filter(pub -> autore.equals(pub.get) )
+        List<Pubblicazioni> ricercaPerAnno=new ArrayList<Pubblicazioni>(listaPubblicazioni.values());
+        ricercaPerAnno.stream().filter(pub -> pub instanceof Libri).filter(l->autore.equals(((Libri) l).getAutore()))
                 .forEach(ele-> System.out.println("Pubblicazioni ricercate: "+ele));
 
         return ricercaPerAnno;
 
-    };
-
     }
+
+
+    public static void modifica(long ibsn) throws IsbnInesitente {
+
+        List<Pubblicazioni> elementoModificato= new ArrayList<>(listaPubblicazioni.values());
+
+        for(Pubblicazioni pub:elementoModificato) {
+            if (pub.ISBN == ibsn) {
+                System.out.println("cosa vuoi aggiornare? digita 1 pe il titolo, 2 per l'anno di pubblicazione");
+
+                int scelta = sc.nextInt();
+
+                if (scelta == 1) {
+                    System.out.println("scrivi il nuovo titolo: ");
+                    String tit = sc.nextLine();
+                    pub.setTitolo(tit);
+                    System.out.println(pub);
+
+                } else if (scelta == 2) {
+                    System.out.println("scrivi il nuovo anno di pubblicazione: ");
+                    long anno = sc.nextLong();
+                    pub.setAnnoPubblicazione(anno);
+                    System.out.println(pub);
+
+
+                } else {
+                    throw new IsbnInesitente("codice ibsn non valido");
+                }
+            }
+
+
+        }}}
+
+
+
 
 
 
