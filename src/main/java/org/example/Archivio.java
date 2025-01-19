@@ -5,7 +5,6 @@ import com.github.javafaker.Faker;
 
 import java.nio.file.FileAlreadyExistsException;
 import java.util.*;
-import java.util.stream.Collectors;
 
 public class Archivio {
 
@@ -18,6 +17,7 @@ public class Archivio {
     public static void main(String[] args) throws Exception {
 
         creazioneArchivio();
+        System.out.println(listaPubblicazioni);
 
         System.out.println("Cosa vuoi fare?");
         System.out.println("digita 1 per aggiungere un libro");
@@ -43,7 +43,15 @@ public class Archivio {
                 aggiungiLibri(i);
                 break;
             case 2:
-                aggiungiRivista(22, "la stagione calcistica", 2);
+                System.out.println("inserisci il codice ibsn della nuova Rivista: ");
+                long ibsnR=sc.nextLong();
+                sc.nextLine();
+                System.out.println("inserisci il titolo della Rivista: ");
+                String titoloR=sc.nextLine();
+                System.out.println("Inserisci la Periodicità:1-- SETTIMANALE, 2 --MENSILE, 3--- ANNUALE");
+                int per=sc.nextInt();
+                sc.nextLine();
+                aggiungiRivista(ibsnR,titoloR,per);
                 break;
             case 3:
                 try {
@@ -103,7 +111,7 @@ public class Archivio {
 
     }
 
-    public static Map<Long,Pubblicazioni> creazioneArchivio() {
+    public static void creazioneArchivio() {
         for (int i = 0; i < 10; i++) {
             Pubblicazioni p = new Libri(i + 1, fake.book().title(), fake.number()
                     .numberBetween(1890, 2023), fake.number().numberBetween(40, 3500), fake.book()
@@ -142,8 +150,6 @@ public class Archivio {
         listaPubblicazioni.put(r9.ISBN,r9);
         listaPubblicazioni.put(r10.ISBN,r10);
 
-
-        return listaPubblicazioni;
     }
 
 
@@ -151,8 +157,20 @@ public class Archivio {
 
         if(!listaPubblicazioni.containsKey(i)) {
 
-            Libri l = new Libri(i, fake.book().title(), fake.number().numberBetween(1950, 2022), fake.number()
-                    .numberBetween(49, 5000), fake.book().author(), fake.book().genre());
+            System.out.println("inserisci il titolo: ");
+            String titolo=sc.nextLine();
+            System.out.println("anno di pubblicazione: ");
+            long annoP= sc.nextLong();
+            sc.nextLine();
+            System.out.println("numero di pagine: ");
+            int numeroPagine= sc.nextInt();
+            sc.nextLine();
+            System.out.println("autore: ");
+            String autore=sc.nextLine();
+            System.out.println("genere: ");
+            String genere=sc.nextLine();
+
+            Libri l = new Libri(i, titolo, annoP, numeroPagine, autore, genere);
             listaPubblicazioni.put(i, l);
             System.out.println("LIBRO AGGIUNTO: " + l);
         }
@@ -163,24 +181,28 @@ public class Archivio {
 
     }
 
-    public static void aggiungiRivista(long i, String titolo, int p) {
+    public static void aggiungiRivista(long i, String titolo, int p) throws FileAlreadyExistsException {
+        if(!listaPubblicazioni.containsKey(i)) {
 
-        if (p == 1) {
-            Riviste r = new Riviste(i, titolo, fake.number().numberBetween(1950, 2022), fake.number()
-                    .numberBetween(49, 5000), Periodicita.SETTIMANALE);
-            listaPubblicazioni.put( i,r);
-            System.out.println("RIVISTA AGGIUNTA: " + r);
-        } else if (p == 2) {
-            Riviste r = new Riviste(i, titolo, fake.number().numberBetween(1950, 2022), fake.number()
-                    .numberBetween(49, 5000), Periodicita.MENSILE);
-            listaPubblicazioni.put(i,r);
-            System.out.println("RIVISTA AGGIUNTA: " + r);
-        } else if (p == 3) {
-            Riviste r = new Riviste(i, titolo, fake.number().numberBetween(1950, 2022), fake.number()
-                    .numberBetween(49, 5000), Periodicita.ANNUALE);
-            listaPubblicazioni.put(i,r);
-            System.out.println("RIVISTA AGGIUNTA: " + r);
+            if (p == 1) {
+                Riviste r = new Riviste(i, titolo, fake.number().numberBetween(1950, 2022), fake.number()
+                        .numberBetween(49, 5000), Periodicita.SETTIMANALE);
+                listaPubblicazioni.put(i, r);
+                System.out.println("RIVISTA AGGIUNTA: " + r);
+            } else if (p == 2) {
+                Riviste r = new Riviste(i, titolo, fake.number().numberBetween(1950, 2022), fake.number()
+                        .numberBetween(49, 5000), Periodicita.MENSILE);
+                listaPubblicazioni.put(i, r);
+                System.out.println("RIVISTA AGGIUNTA: " + r);
+            } else if (p == 3) {
+                Riviste r = new Riviste(i, titolo, fake.number().numberBetween(1950, 2022), fake.number()
+                        .numberBetween(49, 5000), Periodicita.ANNUALE);
+                listaPubblicazioni.put(i, r);
+                System.out.println("RIVISTA AGGIUNTA: " + r);
 
+            }
+        } else {
+            throw new FileAlreadyExistsException("ibsn gia presente in archivio");
         }
 
     }
@@ -200,22 +222,19 @@ public class Archivio {
         listaPubblicazioni.remove(i);
         }
 
-        public static List<Pubblicazioni> ricercaAnnoPub(long anno){
+        public static void ricercaAnnoPub(long anno){
 
         List<Pubblicazioni> ricercaPerAnno=new ArrayList<>(listaPubblicazioni.values());
         ricercaPerAnno.stream().filter(pub -> anno== pub.annoPubblicazione )
                 .forEach(ele-> System.out.println("Pubblicazioni ricercate: "+ele));
 
-        return ricercaPerAnno;
-
         }
-    public static List<Pubblicazioni> ricercaAutore(String autore){
+    public static void ricercaAutore(String autore){
 
         List<Pubblicazioni> ricercaPerAnno=new ArrayList<>(listaPubblicazioni.values());
         ricercaPerAnno.stream().filter(pub -> pub instanceof Libri).filter(l->autore.equals(((Libri) l).getAutore()))
                 .forEach(ele-> System.out.println("Pubblicazioni ricercate: "+ele));
 
-        return ricercaPerAnno;
 
     }
 
