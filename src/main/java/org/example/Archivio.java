@@ -3,6 +3,7 @@ package org.example;
 
 import com.github.javafaker.Faker;
 
+import java.nio.file.FileAlreadyExistsException;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -11,7 +12,7 @@ public class Archivio {
     public static Faker fake = new Faker(new Locale("it"));
     public static Scanner sc = new Scanner(System.in);
 
-    private static Map<Long,Pubblicazioni> listaPubblicazioni = new HashMap<Long,Pubblicazioni>();
+    private static Map<Long,Pubblicazioni> listaPubblicazioni = new HashMap<>();
 
 
     public static void main(String[] args) throws Exception {
@@ -21,11 +22,12 @@ public class Archivio {
         System.out.println("Cosa vuoi fare?");
         System.out.println("digita 1 per aggiungere un libro");
         System.out.println("digita 2 per aggiungere un Rivista");
-        System.out.println("digita 3 per ricercare una Pubblicazione ");
+        System.out.println("digita 3 per ricercare una Pubblicazione");
         System.out.println("digita 4 per eliminiare una pubblicazione");
         System.out.println("digita 5 per ricercare  tramite anno di pubblicazione ");
         System.out.println("digita 6 per ricercare un autore ");
         System.out.println("digita 7 per modificare una pubblicazione ");
+        System.out.println("digita 8 per visualizzare le statistiche");
         System.out.println("digita 0 terminare");
 
         int azioneScelta= sc.nextInt();
@@ -35,7 +37,10 @@ public class Archivio {
                 System.out.println("programma terminato");
                 break;
             case 1:
-                aggiungiLibri(21);
+                System.out.println("inserisci il codice ibsn del nuovo Libro: ");
+                long i=sc.nextLong();
+                sc.nextLine();
+                aggiungiLibri(i);
                 break;
             case 2:
                 aggiungiRivista(22, "la stagione calcistica", 2);
@@ -80,11 +85,14 @@ public class Archivio {
                     System.out.println("errore di inserimento" + e.getMessage());
                 }
                 break;
-            case 8:
+            case 7:
                 System.out.println("Fornisci Ibsn della pubblicazione da modificare");
                 long ibsn=sc.nextLong();
                 sc.nextLine();
                 modifica(ibsn);
+                break;
+            case 8:
+                statistiche();
                 break;
 
             default:
@@ -139,12 +147,19 @@ public class Archivio {
     }
 
 
-    public static void aggiungiLibri(long i) {
+    public static void aggiungiLibri(long i) throws FileAlreadyExistsException {
 
-        Libri l = new Libri(i, fake.book().title(), fake.number().numberBetween(1950, 2022), fake.number()
-                .numberBetween(49, 5000), fake.book().author(), fake.book().genre());
-        listaPubblicazioni.put( i,l);
-        System.out.println("LIBRO AGGIUNTO: " + l);
+        if(!listaPubblicazioni.containsKey(i)) {
+
+            Libri l = new Libri(i, fake.book().title(), fake.number().numberBetween(1950, 2022), fake.number()
+                    .numberBetween(49, 5000), fake.book().author(), fake.book().genre());
+            listaPubblicazioni.put(i, l);
+            System.out.println("LIBRO AGGIUNTO: " + l);
+        }
+        else {
+            throw new FileAlreadyExistsException("ibsn gia presente in archivio");
+        }
+
 
     }
 
@@ -187,16 +202,16 @@ public class Archivio {
 
         public static List<Pubblicazioni> ricercaAnnoPub(long anno){
 
-        List<Pubblicazioni> ricercaPerAnno=new ArrayList<Pubblicazioni>(listaPubblicazioni.values());
+        List<Pubblicazioni> ricercaPerAnno=new ArrayList<>(listaPubblicazioni.values());
         ricercaPerAnno.stream().filter(pub -> anno== pub.annoPubblicazione )
                 .forEach(ele-> System.out.println("Pubblicazioni ricercate: "+ele));
 
         return ricercaPerAnno;
 
-        };
+        }
     public static List<Pubblicazioni> ricercaAutore(String autore){
 
-        List<Pubblicazioni> ricercaPerAnno=new ArrayList<Pubblicazioni>(listaPubblicazioni.values());
+        List<Pubblicazioni> ricercaPerAnno=new ArrayList<>(listaPubblicazioni.values());
         ricercaPerAnno.stream().filter(pub -> pub instanceof Libri).filter(l->autore.equals(((Libri) l).getAutore()))
                 .forEach(ele-> System.out.println("Pubblicazioni ricercate: "+ele));
 
@@ -233,7 +248,27 @@ public class Archivio {
             }
 
 
-        }}}
+
+        }
+    }
+    public static void statistiche(){
+
+        List<Pubblicazioni> statistiche= new ArrayList<>(listaPubblicazioni.values());
+
+        long numeroLibri=statistiche.stream().filter(pub->pub instanceof Libri).count();
+        long numeroRiviste=statistiche.stream().filter(pub->pub instanceof Riviste).count();
+
+      List <Pubblicazioni> p= statistiche.stream().sorted(Comparator.comparing(Pubblicazioni::getNumPagine).reversed()).limit(1).toList();
+
+       double numPagineMedie= statistiche.stream().mapToDouble(Pubblicazioni::getNumPagine).average().orElse(0.0);
+
+        System.out.println("In archivio sono presenti: " +numeroLibri+ " Libri.");
+        System.out.println("In archivio sono presenti: " +numeroRiviste+ " Riviste.");
+        System.out.println("La pubblicazione con il maggior numero di pagine e: " + p);
+        System.out.println("il numero medio delle pagine delle Pubblicazioni presenti in archivio è: " + numPagineMedie);
+
+    }
+}
 
 
 
